@@ -1,24 +1,27 @@
-# Krusell & Smith replication
 
-In this notebook, I implement Krusell & Smith (1998) model version with endogenous labor using the 
-algorithm proposed by the authors. To check my results, I will try to replicate the figures and coefficients 
-presented in the working paper version of the article 
-[Krussel & Smith (1995)](http://www.econ.yale.edu/smith/rcer399.pdf) 
-since it contains more information than the final published paper.
+## Krussel & Smith replication
+
+
+In this notebook, I implement Krusell & Smith (1998) model version with endogenous labor using the algorithm proposed by the authors. To check my results, I will try to replicate the figures and coefficients presented in the working paper version of the article [Krussel & Smith (1995)](http://www.econ.yale.edu/smith/rcer399.pdf) since it contains more information than the final published paper.
+
 
 ### Krusell & Smith Model
 
+
 This section explains the model and I also comment on the strategies I took to solve it.
 
-There is a competitive representative firm which uses capital $K_t$ and labor $H_t$ as inputs and 
-faces a productivity shock $Z_t$. From the firm's problem we get the wages and capital return as a 
-function of the aggregate states:
 
-$ w(K_t,H_t,Z_t) = (1-\alpha)Z_tK_t^{\alpha}H_t^{-\alpha} $
+There is a competitive representative firm which uses capital $K_t$ and labor $H_t$ as inputs and faces a productivity shock $Z_t$. From the firm's problem we get the wages and capital return as a function of the aggregate states:
 
-$$ R(K_t,H_t,Z_t) = \alpha Z_tK_t^{\alpha-1}H_t^{1-\alpha}+1-\delta $$
 
-$$ Z \in \{0.99,1.01\} $$
+$$w(K_t,H_t,Z_t) = (1-\alpha)Z_tK_t^{\alpha}H_t^{-\alpha}$$
+
+
+$$R(K_t,H_t,Z_t) = \alpha Z_tK_t^{\alpha-1}H_t^{1-\alpha}+1-\delta$$
+
+
+$Z$ is assumed to have 2 values: $[0.99,1.01]$.
+
 
 The economy also consists of a continuum of ex ante identical households with unit mass. Each period, agents face an idiosyncratic shock $e$ that determines whether they are employed, $e_{n,t} = 1$,or unemployed, $e_{n,t} = 0$. An employed agent earns wage $w$ per unit of labor. Markets are incomplete and agents can only save through capital accumulation, individual capital is denoted by $a_t$ and $R$ is the net rate of return. The agent must also keep track of the aggregate states of the economy. We will assume that the aggregates follow the following functional forms:
 
@@ -36,16 +39,21 @@ and $$ \ln H
 when $Z=0.99$
 
 
+
 The agent recursive problem is thus the following:
 
-$$V(a,e,K,H,Z) = max_{c,a',n} \frac{\left(c^\eta(1-n)^{1-\eta}\right)^{1-\mu}}{1-\mu} + 
-\beta E\left[V(a',e',K',H',Z')|e,K,H,Z\right] $$
+
+$$V(a,e,K,H,Z) = max_{c,a',n} \frac{\left(c^\eta(1-n)^{1-\eta}\right)^{1-\mu}}{1-\mu} + \beta E\left[V(a',e',K',H',Z')|e,K,H,Z\right] $$
+
 
 Subject to the budget constraint:
 
+
 $$c \leq R(K,H,Z)a -a'+w(K,H,Z)e n $$
 
+
 $$a'\geq0$$
+
 
 And the beliefs: $ \ln K'= b_{0,g} + b_{1,g}\ln K$ and $ \ln H
 '= d_{0,g} + d_{1,g}\ln K$ when $Z=1.01$
@@ -53,37 +61,49 @@ And the beliefs: $ \ln K'= b_{0,g} + b_{1,g}\ln K$ and $ \ln H
 $ \ln K'= b_{0,b} + b_{1,b}\ln K$ and $ \ln H
 '= d_{0,b} + d_{1,b}\ln K$ when $Z=0.99$
 
+
 A recursive competitive equilibrium is an allocation that solves the agent problem and the aggregates moves consistently with the beliefs.
+
 
 We parametrize the model following precisely Krusell & Smith parameters: 
 
 $\beta = 0.99, \;\delta = 0.0025,\;\mu = 1$ (which implies log utility). The stochastic process for $(Z,e)$ is set so the unemployment rate in good states is 0.04 and 0.1 in bad times. The average duration of good and times is 8 periods and the average duration of unemployment is 1.5 in good times and 2.5 in bad times.
 
+
 ### Solving the Consumer Problem
+
 
 Due to the quantity of states, this problem is hard to solve. The usual methods I used in the previous homeworks were not able to handle this problem. Although Value Function Iteration or Euler Equation iteration worked in this case, they both were taking a ridiculous amount of time. Approximately 4 hours to solve the agent problem with a fairly small grid. The challenge was to solve the system of equations (in the case of Euler Equations) or the optimization problem (VFI) for labor and assets. It is also obvious that discrete state space that I use often for simple problems, is also not an option since it would require an enormous amount of memory. 
 
+
 Instead of trying to speed up the solver, I decided to try another approach. Carroll's endogenous grid method proved to be very efficient in handling this problem. With a grid 6 times larger, the method solves the agent problem in less than 5 minutes since it does not involve any optimization. Usually, the endogenous grid method does not apply directly to endogenous labor problems (in the simple growth model the method would require some tweaks (see [Barillas & Fernandez-Villaverde (2006)](https://www.sas.upenn.edu/~jesusfv/Endogenous_Grid.pdf) for a discussion) but since wages are exogenous to consumer decisions in this case it works:
+
 
 Consider the labor labor consumption FOC:
 
+
 $$ \frac{u_n}{u_c} = w$$
+
 
 Plugging the functional forms, we can solve for $n$:
 
+
 $n^*(c,e,K,H,Z) = 1-\frac{1-\eta}{\eta}\frac{c}{w(K,H,Z)}$ if $e = 1$ and $n=0$ otherwise.
+
 
 From the intertemporal Euler equation we have:
 
+
 $$u_c(c,n) = \beta E[ R(K',H',Z')u_c(c',n')| e,K,H,Z]$$
+
 
 The strategy here is to define a grid for assets in $t+1$ and to guess a functional form for $c$ so given that gues and the labor equation found above,  the right hand side of this eqution is a constant (named here RHS). Plugging the function forms for $u$ and $n^*$, we get that:
 
 $$c = \left[ \frac{RHS}{\eta} \left( \frac{(1-\eta)}{\eta w(K,H,Z)}\right)^{-(1-\mu)(1-\eta)}\right]^\frac{-1}{\mu} $$
 if $e>0$ and $c = \left[ \frac{RHS}{\eta}\right]^\frac{-1}{\mu}$ otherwise.
 
-With these equations we may proceed to an usual implementation of the endogenous grid method.
 
+With these equations we may proceed to an usual implementation of the endogenous grid method.
 
 ```julia
 using Interpolations, ProgressMeter
@@ -268,13 +288,12 @@ EE (generic function with 1 method)
 
 
 
-
 ### Finding the Aggregate States law of motion
+
 
 The algorithm proposed by Krusell & Smith is fairly simple. It is enough to simulate the economy for a large number of agents and periods and then regress the law of motion coeffients by OLS. One quick comment on the generation of shocks is that I must make sure that the distribution is consistent. For example, I generate the series of $Z$ and for each agent the draw $e_{n,t}$ must take into acount $e_{n,t-1},Z_{t-1},Z_t$ since the shocks are not independent.
 
 During the simulation I took some time to figure out that one must ensure that labor market clear every period (since capital is predetermined, this is not an issue in that market). To do so, we must each period guess an initial aggregate state for labor and then loop until the convergence (i.e. the aggregate of the indiviual labor decisions equals the aggregate labor guess). The code below implements the simulation:
-
 
 ```julia
 function KrusselSmithENDOGENOUS(A::Array{Float64,1},A1::Array{Float64,1},
@@ -468,9 +487,7 @@ KrusselSmithENDOGENOUS (generic function with 1 method)
 
 
 
-
 ### Defining Parameters
-
 
 ```julia
 #Defining parameters they were taken frmom KS
@@ -537,13 +554,12 @@ H = range(0.001,stop = lbar,length = nH).^1.0;
 
 
 
-
 ### Results
+
 
 Run the code, note that simulation takes time. 
 Alternatively, you may set the variable load below to true so 
 it will load a previously simulated economy.
-
 
 ```julia
 using JLD2, FileIO
@@ -588,9 +604,9 @@ The coefficients I find are the following:
 $$ ln K_{t+1} = 0.114 + 0.953ln K_t$$
 $R^2 =0.999$ in bad times and:
 $$ ln K_{t+1} = 0.128 + 0.949ln K_t$$
-$R^2 =0.999$ in good times times. The result for bad times is exactly the 
-same as Krusell & Smith while they found for good times: 
+$R^2 =0.999$ in good times times. The result for bad times is exactly the same as Krusell & Smith while they found for good times: 
 $$ ln K_{t+1} = 0.123 + 0.951ln K_t$$
+
 
 For labor:
 $$ ln H_{t} = -0.560 - 0.260ln K_t$$
@@ -603,8 +619,8 @@ $$ ln H_{t} = -0.544 - 0.252ln K_t$$
 in good times.
 
 
-Now we plot the relationship of aggregate capital tommorow vs today which is undistinguishable from paper's figure 7:
 
+Now we plot the relationship of aggregate capital tommorow vs today which is undistinguishable from paper's figure 7:
 
 ```julia
 using Plots
@@ -617,7 +633,6 @@ plot!(11.7:0.1:12.7 ,11.7:0.1:12.7, label = "45 degrees")
 ```
 
 ![](figures/main_5_1.png)
-
 
 
 Paper figure 8 plots the relationship between aggregate labor and aggregate capital:
@@ -633,9 +648,7 @@ linestyle = :dot,label = "Good State")
 ![](figures/main_6_1.png)
 
 
-
 Although Krusell & Smith do not report the figures below, it has become somewhat common in the literature to plot the evolution of the actual Aggregate variables vs what the law of motion would imply:
-
 
 ```julia
 
@@ -659,6 +672,7 @@ plot!(Ksim[discard+1:end],label = "Implied by law of motion")
 ![](figures/main_7_1.png)
 
 ```julia
+
 plot(Hsimimplied,ylabel="\$H_t\$",xlabel="Time",label = "Aggregate Labor",linestyle = :dot)
 plot!(Hsim[discard+1:end],label = "Implied by law of motion")
 ```
