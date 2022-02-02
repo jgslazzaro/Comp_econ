@@ -84,7 +84,7 @@ if $e>0$ and $c = \left[ \frac{RHS}{\eta}\right]^\frac{-1}{\mu}$ otherwise.
 With these equations we may proceed to an usual implementation of the endogenous grid method.
 
 
-~~~~{.julia}
+```julia
 using Interpolations, ProgressMeter
 using Distributions, Random, DataFrames, GLM
 #using Distributed, SharedArrays
@@ -258,11 +258,11 @@ function EE(a1;e=E[e]::Float64,
 
     return c,a
 end
-~~~~~~~~~~~~~
+```
 
-~~~~
+```
 EE (generic function with 1 method)
-~~~~
+```
 
 
 
@@ -275,7 +275,7 @@ The algorithm proposed by Krusell & Smith is fairly simple. It is enough to simu
 During the simulation I took some time to figure out that one must ensure that labor market clear every period (since capital is predetermined, this is not an issue in that market). To do so, we must each period guess an initial aggregate state for labor and then loop until the convergence (i.e. the aggregate of the indiviual labor decisions equals the aggregate labor guess). The code below implements the simulation:
 
 
-~~~~{.julia}
+```julia
 function KrusselSmithENDOGENOUS(A::Array{Float64,1},A1::Array{Float64,1},
     E::Array{Float64,1},Z::Array{Float64,1},tmat::TransitionMatrix,states::NTuple{4,Array{Float64,1}},
     K::Array{Float64,1},H::Array{Float64,1},  b::Array{Float64,2},d::Array{Float64,2};
@@ -458,11 +458,11 @@ function KrusselSmithENDOGENOUS(A::Array{Float64,1},A1::Array{Float64,1},
     println("Krussell Smith done!")
     return b, d,  nsim, asim, Ksim, Hsim,policygrid,K,R2b,R2d,zsimd,esim
 end
-~~~~~~~~~~~~~
+```
 
-~~~~
+```
 KrusselSmithENDOGENOUS (generic function with 1 method)
-~~~~
+```
 
 
 
@@ -471,7 +471,7 @@ KrusselSmithENDOGENOUS (generic function with 1 method)
 ### Defining Parameters
 
 
-~~~~{.julia}
+```julia
 #Defining parameters they were taken frmom KS
 const α = 0.36 #capital share in output
 const β = 0.99 #Impatience
@@ -532,7 +532,7 @@ end
 #H = (range((nH-1)/(10*maximum(Hk)), stop=nH-1, length=nH)/(nH)).^1.0 * (maximum(Hk))
 
 H = range(0.001,stop = lbar,length = nH).^1.0;
-~~~~~~~~~~~~~
+```
 
 
 
@@ -544,7 +544,7 @@ Alternatively, you may set the variable load below to true so
 it will load a previously simulated economy.
 
 
-~~~~{.julia}
+```julia
 using JLD2, FileIO
 
 load = true
@@ -558,9 +558,9 @@ else
 #Save results
     @save "save_variables/variables_nA$(nA).jld2" b d  nsim asim Ksim Hsim policygrid K R2b R2d zsim esim discard Z T
 end
-~~~~~~~~~~~~~
+```
 
-~~~~
+```
 15-element Vector{Symbol}:
  :b
  :d
@@ -577,7 +577,7 @@ end
  :discard
  :Z
  :T
-~~~~
+```
 
 
 
@@ -605,7 +605,7 @@ in good times.
 Now we plot the relationship of aggregate capital tommorow vs today which is undistinguishable from paper's figure 7:
 
 
-~~~~{.julia}
+```julia
 using Plots
 #Aggregate Capital vs capital:
 plot((Ksim[discard+1:end-1][zsim[1:end-1].==Z[1]]) ,(Ksim[discard+2:end][zsim[1:end-1].==Z[1]]),
@@ -613,32 +613,30 @@ xlabel = "\$K_t\$",ylabel = "\$K_{t+1}\$",linestyle = :dot, label = "Bad State",
 plot!((Ksim[discard+1:end-1][zsim[1:end-1].==Z[2]]) ,(Ksim[discard+2:end][zsim[1:end-1].==Z[2]]),
 linestyle = :dot, label = "Good State")
 plot!(11.7:0.1:12.7 ,11.7:0.1:12.7, label = "45 degrees")
-~~~~~~~~~~~~~
+```
 
-![](figures/main_5_1.png)\ 
-
+![](figures/main_5_1.png)
 
 
 
 Paper figure 8 plots the relationship between aggregate labor and aggregate capital:
 
-~~~~{.julia}
+```julia
 #Aggregate labor vs capital:
 plot((Ksim[discard+1:end][zsim.==Z[1]]) ,(Hsim[discard+1:end][zsim.==Z[1]]),
 xlabel = "\$K_t\$",ylabel = "\$H_t\$",linestyle = :dot, label = "Bad State")
 plot!((Ksim[discard+1:end][zsim.==Z[2]]) ,(Hsim[discard+1:end][zsim.==Z[2]]),
 linestyle = :dot,label = "Good State")
-~~~~~~~~~~~~~
+```
 
-![](figures/main_6_1.png)\ 
-
+![](figures/main_6_1.png)
 
 
 
 Although Krusell & Smith do not report the figures below, it has become somewhat common in the literature to plot the evolution of the actual Aggregate variables vs what the law of motion would imply:
 
 
-~~~~{.julia}
+```julia
 
 #Law of motion functions for aggregate states
 K1(K::Float64,z::Float64;b=b::Array{Float64,2},Z= Z::Array{Float64,1}) = exp(b[findfirst(Z.==z),1]+b[findfirst(Z.==z),2]*log(K))
@@ -655,15 +653,13 @@ end
 
 plot(Ksimimplied,xlabel="\$K_t\$",ylabel="Time",label = "Aggregate Capital",linestyle = :dot)
 plot!(Ksim[discard+1:end],label = "Implied by law of motion")
-~~~~~~~~~~~~~
+```
 
-![](figures/main_7_1.png)\ 
+![](figures/main_7_1.png)
 
-
-~~~~{.julia}
+```julia
 plot(Hsimimplied,ylabel="\$H_t\$",xlabel="Time",label = "Aggregate Labor",linestyle = :dot)
 plot!(Hsim[discard+1:end],label = "Implied by law of motion")
-~~~~~~~~~~~~~
+```
 
-![](figures/main_8_1.png)\ 
-
+![](figures/main_8_1.png)
