@@ -1,8 +1,4 @@
----
-doctype: "github"
-title: "Krussel & Smith replication"
----
-
+# Krusell & Smith replication
 
 In this notebook, I implement Krusell & Smith (1998) model version with endogenous labor using the 
 algorithm proposed by the authors. To check my results, I will try to replicate the figures and coefficients 
