@@ -16,36 +16,39 @@ function of the aggregate states:
 
 $ w(K_t,H_t,Z_t) = (1-\alpha)Z_tK_t^{\alpha}H_t^{-\alpha} $
 
-`` R(K_t,H_t,Z_t) = \alpha Z_tK_t^{\alpha-1}H_t^{1-\alpha}+1-\delta ``
+$ R(K_t,H_t,Z_t) = \alpha Z_tK_t^{\alpha-1}H_t^{1-\alpha}+1-\delta $
 
-`` Z \in \{0.99,1.01\} ``
+$ Z \in \{0.99,1.01\} $
 
 The economy also consists of a continuum of ex ante identical households with unit mass. Each period, agents face an idiosyncratic shock $e$ that determines whether they are employed, $e_{n,t} = 1$,or unemployed, $e_{n,t} = 0$. An employed agent earns wage $w$ per unit of labor. Markets are incomplete and agents can only save through capital accumulation, individual capital is denoted by $a_t$ and $R$ is the net rate of return. The agent must also keep track of the aggregate states of the economy. We will assume that the aggregates follow the following functional forms:
 
-`` \ln K'= b_{0,g} + b_{1,g}\ln K `` 
+$ \ln K'= b_{0,g} + b_{1,g}\ln K $ 
+
 and 
-`` \ln H
-'= d_{0,g} + d_{1,g}\ln K`` 
+
+$ \ln H
+'= d_{0,g} + d_{1,g}\ln K$ 
 
 when $Z=1.01$
 
-`` \ln K'= b_{0,b} + b_{1,b}\ln K `` 
-and `` \ln H
-'= d_{0,b} + d_{1,b}\ln K `` 
+$ \ln K'= b_{0,b} + b_{1,b}\ln K $ 
+and 
+
+$ \ln H' = d_{0,b} + d_{1,b}\ln K $ 
 
 when $Z=0.99$
 
 
 The agent recursive problem is thus the following:
 
-``V(a,e,K,H,Z) = max_{c,a',n} \frac{\left(c^\eta(1-n)^{1-\eta}\right)^{1-\mu}}{1-\mu} + 
-\beta E\left[V(a',e',K',H',Z')|e,K,H,Z\right] ``
+$V(a,e,K,H,Z) = max_{c,a',n} \frac{\left(c^\eta(1-n)^{1-\eta}\right)^{1-\mu}}{1-\mu} + 
+\beta E\left[V(a',e',K',H',Z')|e,K,H,Z\right] $
 
 Subject to the budget constraint:
 
-``c \leq R(K,H,Z)a -a'+w(K,H,Z)e n ``
+$c \leq R(K,H,Z)a -a'+w(K,H,Z)e n $
 
-``a'\geq0``
+$a'\geq0$
 
 And the beliefs: $ \ln K'= b_{0,g} + b_{1,g}\ln K$ and $ \ln H
 '= d_{0,g} + d_{1,g}\ln K$ when $Z=1.01$
@@ -67,7 +70,7 @@ Instead of trying to speed up the solver, I decided to try another approach. Car
 
 Consider the labor labor consumption FOC:
 
-`` \frac{u_n}{u_c} = w``
+$ \frac{u_n}{u_c} = w$
 
 Plugging the functional forms, we can solve for $n$:
 
@@ -75,11 +78,11 @@ $n^*(c,e,K,H,Z) = 1-\frac{1-\eta}{\eta}\frac{c}{w(K,H,Z)}$ if $e = 1$ and $n=0$ 
 
 From the intertemporal Euler equation we have:
 
-``u_c(c,n) = \beta E[ R(K',H',Z')u_c(c',n')| e,K,H,Z]``
+$u_c(c,n) = \beta E[ R(K',H',Z')u_c(c',n')| e,K,H,Z]$
 
 The strategy here is to define a grid for assets in $t+1$ and to guess a functional form for $c$ so given that gues and the labor equation found above,  the right hand side of this eqution is a constant (named here RHS). Plugging the function forms for $u$ and $n^*$, we get that:
 
-``c = \left[ \frac{RHS}{\eta} \left( \frac{(1-\eta)}{\eta w(K,H,Z)}\right)^{-(1-\mu)(1-\eta)}\right]^\frac{-1}{\mu} ``
+$c = \left[ \frac{RHS}{\eta} \left( \frac{(1-\eta)}{\eta w(K,H,Z)}\right)^{-(1-\mu)(1-\eta)}\right]^\frac{-1}{\mu} $
 if $e>0$ and $c = \left[ \frac{RHS}{\eta}\right]^\frac{-1}{\mu}$ otherwise.
 
 With these equations we may proceed to an usual implementation of the endogenous grid method.
@@ -585,21 +588,21 @@ end
 
 The coefficients I find are the following:
 
-`` ln K_{t+1} = 0.114 + 0.953ln K_t``
+$ ln K_{t+1} = 0.114 + 0.953ln K_t$
 $R^2 =0.999$ in bad times and:
-`` ln K_{t+1} = 0.128 + 0.949ln K_t``
+$ ln K_{t+1} = 0.128 + 0.949ln K_t$
 $R^2 =0.999$ in good times times. The result for bad times is exactly the 
 same as Krusell & Smith while they found for good times: 
-`` ln K_{t+1} = 0.123 + 0.951ln K_t``
+$ ln K_{t+1} = 0.123 + 0.951ln K_t$
 
 For labor:
-`` ln H_{t} = -0.560 - 0.260ln K_t``
+$ ln H_{t} = -0.560 - 0.260ln K_t$
 $R^2 =0.989$ in bad times and
-`` ln H_{t} = -0.485 - 0.267ln K_t``
+$ ln H_{t} = -0.485 - 0.267ln K_t$
 $R^2 =0.992$ in good times times. Krusell & Smith results are:
-`` ln H_{t} = -0.592 - 0.252ln K_t``
+$ ln H_{t} = -0.592 - 0.252ln K_t$
 in bad times and
-`` ln H_{t} = -0.544 - 0.252ln K_t``
+$ ln H_{t} = -0.544 - 0.252ln K_t$
 in good times.
 
 
